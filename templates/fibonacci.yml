@@ -27,13 +27,22 @@ jobs:
       matrix:
         n: ['3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20']
     steps:
+      - name: Compute predecessor index
+        id: predecessor
+        env:
+          N: ${{ matrix.n }}
+        run: |
+          prev=$((N - 1))
+          echo "prev=$prev" >> "$GITHUB_OUTPUT"
+          echo "prev=$prev"
+
       - name: Download predecessor result
         if: ${{ matrix.n != '3' }}
         uses: Wandalen/wretry.action@v3.8.0
         with:
           action: actions/download-artifact@v4
           with: |
-            name: fib-${{ inputs.chain }}-${{ fromJSON(matrix.n) - 1 }}
+            name: fib-${{ inputs.chain }}-${{ steps.predecessor.outputs.prev }}
             path: .
           attempt_limit: 120
           attempt_delay: 15000
