@@ -19,7 +19,7 @@ on:
         default: 'ubuntu-24.04'
 
 permissions:
-  actions: read
+  actions: write
 
 jobs:
   fib:
