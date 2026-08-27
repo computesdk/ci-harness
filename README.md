@@ -28,7 +28,7 @@ Because this package is consumed as raw TypeScript, the consuming benchmark must
 
 ## Participants
 
-`ciProviders` lists the six CI providers. Each provider uses the same GitHub Actions dispatch + artifact store; the only difference is the `runs-on` label.
+`ciProviders` lists the seven CI providers. Each provider uses the same GitHub Actions dispatch + artifact store; the only difference is the `runs-on` label.
 
 | Provider   | `runsOn`                        | Required env vars                             |
 | ---------- | ------------------------------- | --------------------------------------------- |
@@ -38,6 +38,7 @@ Because this package is consumed as raw TypeScript, the consuming benchmark must
 | `warpbuild` | `warp-ubuntu-2404-x64-2x`      | `GITHUB_TOKEN`, `GITHUB_REPO`, `WARPBUILD_ENABLED` |
 | `tenki`    | `tenki-standard-small-2c-4g`    | `GITHUB_TOKEN`, `GITHUB_REPO`, `TENKI_ENABLED` |
 | `starsling` | `starsling-ubuntu-24.04-2`      | `GITHUB_TOKEN`, `GITHUB_REPO`, `STARSLING_ENABLED` |
+| `namespace` | `nscloud-ubuntu-24.04-amd64-2x4` | `GITHUB_TOKEN`, `GITHUB_REPO`, `NAMESPACE_ENABLED` |
 
 The `_ENABLED` flags let providers be committed before their runners or secrets are registered. The `@benchsdk/runner` participant filter will skip any provider whose required env vars are missing.
 

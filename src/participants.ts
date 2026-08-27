@@ -46,4 +46,9 @@ export const ciProviders: CiRunnerParticipant[] = [
     requiredEnvVars: ['GITHUB_TOKEN', 'GITHUB_REPO', 'STARSLING_ENABLED'],
     runsOn: 'starsling-ubuntu-24.04-2',
   },
+  {
+    name: 'namespace',
+    requiredEnvVars: ['GITHUB_TOKEN', 'GITHUB_REPO', 'NAMESPACE_ENABLED'],
+    runsOn: 'nscloud-ubuntu-24.04-amd64-2x4',
+  },
 ];
