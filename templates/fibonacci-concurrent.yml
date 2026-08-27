@@ -47,11 +47,10 @@ jobs:
           fi
           value=$((a + b))
           echo "fib($N) = $value"
-          mkdir -p out
-          echo "$b $value" > out/result.txt
+          echo "$b $value" > result.txt
 
       - name: Publish result
         uses: actions/upload-artifact@v4
         with:
           name: fib-${{ inputs.chain }}-${{ inputs.n }}
-          path: out/result.txt
+          path: result.txt

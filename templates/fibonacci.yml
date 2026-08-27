@@ -3,6 +3,10 @@ name: Fibonacci step (sequential)
 on:
   workflow_dispatch:
     inputs:
+      chain:
+        description: 'Chain ID shared by all runs of one benchmark invocation'
+        required: false
+        default: ''
       n:
         description: 'Fibonacci index computed by this run'
         required: false
@@ -36,6 +40,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           REF: ${{ github.ref_name }}
+          CHAIN: ${{ inputs.chain }}
           N: ${{ inputs.n }}
           A: ${{ inputs.a }}
           B: ${{ inputs.b }}
@@ -45,13 +50,22 @@ jobs:
           value=$((A + B))
           echo "fib($N) = $value"
           if [ "$N" -ge "$DEPTH" ]; then
+            echo "$B $value" > result.txt
             echo "Done: fib($DEPTH) = $value"
             exit 0
           fi
           gh workflow run fibonacci.yml \
             --ref "$REF" \
+            -f "chain=$CHAIN" \
             -f "n=$((N + 1))" \
             -f "a=$B" \
             -f "b=$value" \
             -f "depth=$DEPTH" \
             -f "runs-on=$RUNS_ON"
+
+      - name: Publish final result
+        if: ${{ inputs.chain != '' && inputs.n == inputs.depth }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: fib-${{ inputs.chain }}-${{ inputs.n }}
+          path: result.txt
