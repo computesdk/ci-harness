@@ -1,4 +1,4 @@
-export { BaseParticipant, CiRunnerParticipant } from './types.js';
+export type { BaseParticipant, CiRunnerParticipant } from './types.js';
 export { CiHarnessError } from './errors.js';
 export { ciProviders } from './participants.js';
 export { parseRepo, generateRunId, sleep } from './util.js';
@@ -8,6 +8,8 @@ export {
   listWorkflowRuns,
   pollForWorkflowCompletion,
   getWorkflowRun,
+} from './github.js';
+export type {
   WorkflowRun,
   DispatchWorkflowOptions,
   ListWorkflowRunsOptions,
@@ -15,11 +17,8 @@ export {
   GetWorkflowRunOptions,
   GitHubFetchOptions,
 } from './github.js';
-export {
-  listArtifacts,
-  findArtifact,
-  waitForArtifact,
-  downloadArtifact,
+export { listArtifacts, findArtifact, waitForArtifact, downloadArtifact } from './artifacts.js';
+export type {
   Artifact,
   ListArtifactsOptions,
   WaitForArtifactOptions,
