@@ -66,10 +66,14 @@ export interface WaitForArtifactOptions extends ListArtifactsOptions {
 /**
  * Poll until an artifact with the given name exists. Useful for confirming a
  * concurrent workflow has uploaded its predecessor result.
+ *
+ * Uses exponential backoff to avoid hammering the GitHub API.
  */
 export async function waitForArtifact(options: WaitForArtifactOptions): Promise<Artifact> {
   const { pollMs = 2000, timeoutMs = 10 * 60 * 1000, signal, ...listOptions } = options;
   const deadline = Date.now() + timeoutMs;
+  let delay = Math.max(pollMs, 1000);
+  const maxDelay = 30_000;
 
   for (;;) {
     const artifact = await findArtifact(listOptions);
@@ -79,7 +83,8 @@ export async function waitForArtifact(options: WaitForArtifactOptions): Promise<
       throw new CiHarnessError(`Timeout waiting for artifact "${listOptions.name}"`, { code: 'artifact_timeout' });
     }
 
-    await sleep(pollMs, signal);
+    await sleep(delay, signal);
+    delay = Math.min(delay * 2, maxDelay);
   }
 }
 

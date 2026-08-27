@@ -14,12 +14,13 @@ on:
         required: false
         default: ''
       runs-on:
-        description: 'Runner label for this job'
+        description: 'Runner label for this run'
         required: false
         default: 'ubuntu-24.04'
 
 permissions:
   actions: write
+  contents: read
 
 jobs:
   fib:
@@ -35,10 +36,14 @@ jobs:
           a=1 b=1
           if [ -n "$PREV" ]; then
             artifact_id=""
-            for i in $(seq 1 300); do
-              artifact_id=$(gh api "repos/$REPO/actions/artifacts?name=$PREV" -q '.artifacts[0].id // empty')
+            delay=5
+            max_delay=30
+            for i in $(seq 1 60); do
+              artifact_id=$(gh api "repos/$REPO/actions/artifacts?per_page=1&name=$PREV" -q '.artifacts[0].id // empty')
               [ -n "$artifact_id" ] && break
-              sleep 2
+              sleep "$delay"
+              delay=$(( delay * 2 ))
+              [ "$delay" -gt "$max_delay" ] && delay=$max_delay
             done
             [ -n "$artifact_id" ] || { echo "timed out waiting for $PREV"; exit 1; }
             gh api "repos/$REPO/actions/artifacts/$artifact_id/zip" > result.zip
