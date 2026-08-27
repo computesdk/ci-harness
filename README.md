@@ -11,7 +11,7 @@ Add the git dependency to your benchmark repo:
 ```json
 {
   "dependencies": {
-    "@computesdk/ci-harness": "github:computesdk/ci-harness#main"
+    "@computesdk/ci-harness": "git+https://github.com/computesdk/ci-harness.git#main"
   }
 }
 ```
@@ -22,7 +22,9 @@ Then install as usual:
 pnpm install
 ```
 
-To pin to a specific commit or tag instead of `#main`, use `github:computesdk/ci-harness#<tag-or-sha>`.
+To pin to a specific commit or tag instead of `#main`, use `git+https://github.com/computesdk/ci-harness.git#<tag-or-sha>`.
+
+> Note: pnpm’s `github:` shorthand can force an SSH clone in CI, so the `git+https://` form is preferred for headless runners.
 
 Because this package is consumed as raw TypeScript, the consuming benchmark must run under `tsx` (the standard `@benchsdk/runner` scaffold already does this).
 
