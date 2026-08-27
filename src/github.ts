@@ -186,7 +186,7 @@ export async function pollForWorkflowCompletion(options: PollForWorkflowCompleti
     }
 
     if (newRuns.length >= expectedRuns && newRuns.every((run) => run.status === 'completed')) {
-      return newRuns;
+      return newRuns.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }
 
     if (Date.now() > deadline) {
