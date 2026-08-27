@@ -27,28 +27,23 @@ jobs:
       matrix:
         n: ['3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20']
     steps:
-      - name: Wait for predecessor result and compute fib(n)
+      - name: Wait for predecessor and download
+        if: ${{ matrix.n != '3' }}
+        uses: Wandalen/wretry.action@v3.8.0
+        with:
+          action: actions/download-artifact@v4
+          with: |
+            name: fib-${{ inputs.chain }}-${{ fromJSON(matrix.n) - 1 }}
+            path: .
+          attempt_limit: 120
+          attempt_delay: 15000
+
+      - name: Compute fib(n)
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
-          REPO: ${{ github.repository }}
           N: ${{ matrix.n }}
-          PREV: ${{ matrix.n == '3' && '' || format('fib-{0}-{1}', inputs.chain, fromJSON(matrix.n) - 1) }}
         run: |
           a=1 b=1
-          if [ -n "$PREV" ]; then
-            artifact_id=""
-            delay=10
-            max_delay=60
-            for i in $(seq 1 30); do
-              artifact_id=$(gh api "repos/$REPO/actions/artifacts?per_page=1&name=$PREV" -q '.artifacts[0].id // empty')
-              [ -n "$artifact_id" ] && break
-              sleep "$delay"
-              delay=$(( delay * 2 ))
-              [ "$delay" -gt "$max_delay" ] && delay=$max_delay
-            done
-            [ -n "$artifact_id" ] || { echo "timed out waiting for $PREV"; exit 1; }
-            gh api "repos/$REPO/actions/artifacts/$artifact_id/zip" > result.zip
-            unzip -o result.zip
+          if [ "$N" != "3" ]; then
             read -r a b < result.txt
           fi
           value=$((a + b))
