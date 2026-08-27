@@ -7,6 +7,9 @@ export interface Artifact {
   id: string;
   name: string;
   size?: number;
+  createdAt: string;
+  updatedAt: string;
+  expired: boolean;
 }
 
 interface ListArtifactsResponse {
@@ -14,6 +17,9 @@ interface ListArtifactsResponse {
     id: number;
     name: string;
     size_in_bytes?: number;
+    created_at: string;
+    updated_at: string;
+    expired: boolean;
   }>;
 }
 
@@ -38,13 +44,18 @@ export async function listArtifacts(options: ListArtifactsOptions): Promise<Arti
     id: String(artifact.id),
     name: artifact.name,
     size: artifact.size_in_bytes,
+    createdAt: artifact.created_at,
+    updatedAt: artifact.updated_at,
+    expired: artifact.expired,
   }));
 }
 
-/** Find the most recent artifact with a given name, if any. */
+/** Find the most recent non-expired artifact with a given name, if any. */
 export async function findArtifact(options: ListArtifactsOptions): Promise<Artifact | undefined> {
   const artifacts = await listArtifacts(options);
-  return artifacts.find((a) => a.name === options.name);
+  return artifacts
+    .filter((a) => a.name === options.name && !a.expired)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
 }
 
 export interface WaitForArtifactOptions extends ListArtifactsOptions {
