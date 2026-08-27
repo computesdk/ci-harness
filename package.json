@@ -13,7 +13,9 @@
     }
   },
   "files": [
-    "src"
+    "src",
+    "templates",
+    "README.md"
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
