@@ -1,26 +1,13 @@
-name: Fibonacci step (sequential)
+name: Fibonacci sequential chain
 
 on:
   workflow_dispatch:
     inputs:
       chain:
         description: 'Chain ID shared by all runs of one benchmark invocation'
-        required: false
-        default: ''
-      n:
-        description: 'Fibonacci index computed by this run'
-        required: false
-        default: '3'
-      a:
-        description: 'fib(n-2)'
-        required: false
-        default: '1'
-      b:
-        description: 'fib(n-1)'
-        required: false
-        default: '1'
+        required: true
       depth:
-        description: 'Final fibonacci index to compute; the chain stops here'
+        description: 'Final fibonacci index to compute'
         required: false
         default: '20'
       runs-on:
@@ -34,38 +21,35 @@ permissions:
 jobs:
   fib:
     runs-on: ${{ inputs.runs-on }}
+    if: ${{ fromJSON(matrix.n) <= fromJSON(inputs.depth) }}
+    strategy:
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        n: ['3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20']
     steps:
-      - name: Compute fib(n) and dispatch next run
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-          REF: ${{ github.ref_name }}
-          CHAIN: ${{ inputs.chain }}
-          N: ${{ inputs.n }}
-          A: ${{ inputs.a }}
-          B: ${{ inputs.b }}
-          DEPTH: ${{ inputs.depth }}
-          RUNS_ON: ${{ inputs.runs-on }}
-        run: |
-          value=$((A + B))
-          echo "fib($N) = $value"
-          if [ "$N" -ge "$DEPTH" ]; then
-            echo "$B $value" > result.txt
-            echo "Done: fib($DEPTH) = $value"
-            exit 0
-          fi
-          gh workflow run fibonacci.yml \
-            --ref "$REF" \
-            -f "chain=$CHAIN" \
-            -f "n=$((N + 1))" \
-            -f "a=$B" \
-            -f "b=$value" \
-            -f "depth=$DEPTH" \
-            -f "runs-on=$RUNS_ON"
+      - name: Download predecessor result
+        if: ${{ matrix.n != '3' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: fib-${{ inputs.chain }}-${{ fromJSON(matrix.n) - 1 }}
+          path: .
 
-      - name: Publish final result
-        if: ${{ inputs.chain != '' && inputs.n == inputs.depth }}
+      - name: Compute fib(n)
+        env:
+          N: ${{ matrix.n }}
+        run: |
+          a=1 b=1
+          if [ "$N" != "3" ]; then
+            read -r a b < result.txt
+          fi
+          value=$((a + b))
+          echo "fib($N) = $value"
+          echo "$b $value" > result.txt
+
+      - name: Upload result
         uses: actions/upload-artifact@v4
         with:
-          name: fib-${{ inputs.chain }}-${{ inputs.n }}
+          name: fib-${{ inputs.chain }}-${{ matrix.n }}
           path: result.txt
+          if-no-files-found: error

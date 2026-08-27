@@ -1,37 +1,38 @@
-name: Fibonacci step (concurrent)
+name: Fibonacci concurrent chain
 
 on:
   workflow_dispatch:
     inputs:
-      n:
-        description: 'Fibonacci index computed by this run'
-        required: true
       chain:
         description: 'Chain ID shared by all runs of one benchmark invocation'
         required: true
-      prev_artifact:
-        description: 'Artifact published by the run computing fib(n-1); empty for the first run'
+      depth:
+        description: 'Final fibonacci index to compute'
         required: false
-        default: ''
+        default: '20'
       runs-on:
-        description: 'Runner label for this run'
+        description: 'Runner label for this job'
         required: false
         default: 'ubuntu-24.04'
 
 permissions:
   actions: write
-  contents: read
 
 jobs:
   fib:
     runs-on: ${{ inputs.runs-on }}
+    if: ${{ fromJSON(matrix.n) <= fromJSON(inputs.depth) }}
+    strategy:
+      fail-fast: false
+      matrix:
+        n: ['3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20']
     steps:
       - name: Wait for predecessor result and compute fib(n)
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
-          N: ${{ inputs.n }}
-          PREV: ${{ inputs.prev_artifact }}
+          N: ${{ matrix.n }}
+          PREV: ${{ matrix.n == '3' && '' || format('fib-{0}-{1}', inputs.chain, fromJSON(matrix.n) - 1) }}
         run: |
           a=1 b=1
           if [ -n "$PREV" ]; then
@@ -54,8 +55,9 @@ jobs:
           echo "fib($N) = $value"
           echo "$b $value" > result.txt
 
-      - name: Publish result
+      - name: Upload result
         uses: actions/upload-artifact@v4
         with:
-          name: fib-${{ inputs.chain }}-${{ inputs.n }}
+          name: fib-${{ inputs.chain }}-${{ matrix.n }}
           path: result.txt
+          if-no-files-found: error
