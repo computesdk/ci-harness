@@ -21,7 +21,6 @@ permissions:
 jobs:
   fib:
     runs-on: ${{ inputs.runs-on }}
-    if: ${{ fromJSON(matrix.n) <= fromJSON(inputs.depth) }}
     strategy:
       max-parallel: 1
       fail-fast: false
