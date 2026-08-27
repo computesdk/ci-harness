@@ -1,0 +1,39 @@
+{
+  "name": "@computesdk/ci-harness",
+  "version": "0.0.0",
+  "description": "Shared GitHub Actions CI-runner orchestration helpers for ComputeSDK benchmarks.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "peerDependencies": {
+    "@benchsdk/runner": "^0.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@benchsdk/runner": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@benchsdk/runner": "^0.2.0",
+    "@types/node": "^20.19.43",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}
